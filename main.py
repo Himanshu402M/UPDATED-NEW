@@ -47,10 +47,6 @@ bot = Client(
     bot_token=BOT_TOKEN
 )
 
-processing_request = False
-cancel_requested = False
-cancel_message = None
-
 cookies_file_path = os.getenv("cookies_file_path", "youtube_cookies.txt")
 api_url = "https://scammer-keys.vercel.app/"
 api_token = "eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpZCI6MTU1Mjg4NjQ4LCJvcmdJZCI6MTIzMzEzLCJ0eXBlIjoxLCJtb2JpbGUiOiI5MTk3MjkxNzY2NjEiLCJuYW1lIjoibmFtZSIsImVtYWlsIjoiMTdlMzQ0ZGJhYjJiNDM5MzhiNzg4MTg4OGRkZDllNjBAZ21haWwuY29tIiwiaXNJbnRlcm5hdGlvbmFsIjowLCJkZWZhdWx0TGFuZ3VhZ2UiOiJFTiIsImNvdW50cnlDb2RlIjoiSU4iLCJjb3VudHJ5SVNPIjoiOTEiLCJ0aW1lem9uZSI6IkdNVCs1OjMwIiwiaXNEaXkiOnRydWUsIm9yZ0NvZGUiOiJxc3ZmbiIsImlzRGl5U3ViYWRtaW4iOjAsImZpbmdlcnByaW50SWQiOiJhMTc0MDNmYWE1NDI0ZGI1YmM1ZmUzNzM5OTgzNWE5NCIsImlhdCI6MTc1MTUzOTkwMywiZXhwIjoxNzUyMTQ0NzAzfQ.xx2zOHFPJeIeDFZy51No_2o564QyKiJnKjbWW9L1PgoOjY4AmbhCoFRo2rf9O6wx&auth=@scammer_botxz1"
@@ -63,12 +59,12 @@ photozip = 'https://envs.sh/cD_.jpg'
 
 
 # Inline keyboard for start command
-BUTTONSCONTACT = InlineKeyboardMarkup([[InlineKeyboardButton(text="📞 Contact", url="https://t.me/saini_contact_bot")]])
+BUTTONSCONTACT = InlineKeyboardMarkup([[InlineKeyboardButton(text="📞 Contact", url="https://t.me/BABA_TILLU_JI_Bot")]])
 keyboard = InlineKeyboardMarkup(
     [
         [
-            InlineKeyboardButton(text="🛠️ Help", url="https://t.me/+3k-1zcJxINYwNGZl"),
-            InlineKeyboardButton(text="🛠️ Repo", url="https://github.com/nikhilsainiop/saini-txt-direct"),
+            InlineKeyboardButton(text="🛠️ Help", url="https://t.me/BABA_TILLU_JI_Bot"),
+            InlineKeyboardButton(text="🛠️ CHANNEL", url="https://t.me/+6yAuXl90Ga8yMTk1"),
         ],
     ]
 )
@@ -83,39 +79,40 @@ image_urls = [
 @bot.on_message(filters.command("addauth") & filters.private)
 async def add_auth_user(client: Client, message: Message):
     if message.chat.id != OWNER:
-        return 
+        return await message.reply_text("You are not authorized to use this command.")
+    
     try:
         new_user_id = int(message.command[1])
         if new_user_id in AUTH_USERS:
-            await message.reply_text("**User ID is already authorized.**")
+            await message.reply_text("User ID is already authorized.")
         else:
             AUTH_USERS.append(new_user_id)
-            await message.reply_text(f"**User ID `{new_user_id}` added to authorized users.**")
+            await message.reply_text(f"User ID {new_user_id} added to authorized users.")
     except (IndexError, ValueError):
-        await message.reply_text("**Please provide a valid user ID.**")
+        await message.reply_text("Please provide a valid user ID.")
 
 @bot.on_message(filters.command("users") & filters.private)
 async def list_auth_users(client: Client, message: Message):
     if message.chat.id != OWNER:
-        return
+        return await message.reply_text("You are not authorized to use this command.")
     
-    user_list = '\n'.join(map(str, AUTH_USERS))  # AUTH_USERS ki list dikhayenge
-    await message.reply_text(f"**Authorized Users:**\n{user_list}")
+    user_list = '\n'.join(map(str, get_all_user_ids()))  # Get user IDs from MongoDB
+    await message.reply_text(f"Authorized Users:\n{user_list}")
 
 @bot.on_message(filters.command("rmauth") & filters.private)
 async def remove_auth_user(client: Client, message: Message):
     if message.chat.id != OWNER:
-        return
+        return await message.reply_text("You are not authorized to use this command.")
     
     try:
         user_id_to_remove = int(message.command[1])
         if user_id_to_remove not in AUTH_USERS:
-            await message.reply_text("**User ID is not in the authorized users list.**")
+            await message.reply_text("User ID is not in the authorized users list.")
         else:
             AUTH_USERS.remove(user_id_to_remove)
-            await message.reply_text(f"**User ID `{user_id_to_remove}` removed from authorized users.**")
+            await message.reply_text(f"User ID {user_id_to_remove} removed from authorized users.")
     except (IndexError, ValueError):
-        await message.reply_text("**Please provide a valid user ID.**")
+        await message.reply_text("Please provide a valid user ID.")
     
         
 @bot.on_message(filters.command("cookies") & filters.private)
@@ -279,22 +276,15 @@ async def yt2m_handler(bot: Client, m: Message):
                     await bot.send_document(chat_id=m.chat.id, document=f'{name}.mp3', caption=f'**🎵 Title : **  {name}.mp3\n\n🔗**Video link** : {url}\n\n🌟** Extracted By** : {CREDIT}')
                     os.remove(f'{name}.mp3')
                 except Exception as e:
-                    await editable.delete()
-                    await m.reply_text(f'⚠️**Downloading Failed**⚠️\n**Name** =>> `{name}`\n**Url** =>> {url}\n\n**Failed Reason:**\n<blockquote>{str(e)}</blockquote>', disable_web_page_preview=True)
-           
+                    print(f"Error sending document: {str(e)}")
             else:
-                await editable.delete()
-                await m.reply_text(f'⚠️**Downloading Failed**⚠️\n**Name** =>> `{name}`\n**Url** =>> {url}', disable_web_page_preview=True)
-           
+                print(f"File {name}.mp3 does not exist.")
     except Exception as e:
         await m.reply_text(f"**Failed Reason:**\n<blockquote>{str(e)}</blockquote>")
 
 
 @bot.on_message(filters.command(["ytm"]))
 async def txt_handler(bot: Client, m: Message):
-    global processing_request, cancel_requested, cancel_message
-    processing_request = True
-    cancel_requested = False
     editable = await m.reply_text("🔹**Send me the TXT file containing YouTube links.**")
     input: Message = await bot.listen(editable.chat.id)
     x = await input.download()
@@ -310,30 +300,29 @@ async def txt_handler(bot: Client, m: Message):
             links.append(i.split("://", 1))
         os.remove(x)
     except:
-        await m.reply_text("**Invalid file input.**")
+        await m.reply_text("Invalid file input.")
         os.remove(x)
         return
 
-  
-    await editable.edit(f"🔹**ᴛᴏᴛᴀʟ 🔗 ʟɪɴᴋs ғᴏᴜɴᴅ ᴀʀᴇ --__{len(links)}__--\n🔹sᴇɴᴅ ғʀᴏᴍ ᴡʜᴇʀᴇ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ**")
+    await m.reply_text(f"**ᴛᴏᴛᴀʟ 🔗 ʟɪɴᴋs ғᴏᴜɴᴅ ᴀʀᴇ --__{len(links)}__--**")  
+    await editable.edit("**🔹sᴇɴᴅ ғʀᴏᴍ ᴡʜᴇʀᴇ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ**")
     try:
         input0: Message = await bot.listen(editable.chat.id, timeout=10)
         raw_text = input0.text
         await input0.delete(True)
     except asyncio.TimeoutError:
         raw_text = '1' 
-        
-    await editable.delete()      
-    await m.reply_text(f"<blockquote><b>{file_name}</b></blockquote>")
+        await editable.delete()
+        try:
+            arg = int(raw_text)
+        except:
+            arg = 1
+
+    await m.reply_text(f"**⚡Dᴏᴡɴʟᴏᴀᴅɪɴɢ Sᴛᴀʀᴛᴇᴅ...⏳**")
     count = int(raw_text)
-    arg = int(raw_text)
     try:
         for i in range(arg-1, len(links)):  # Iterate over each link
-            if cancel_requested:
-                await m.reply_text("🚦**STOPPED**🚦")
-                processing_request = False
-                cancel_requested = False
-                return
+
             Vxy = links[i][1].replace("www.youtube-nocookie.com/embed", "youtu.be")
             url = "https://" + Vxy
 
@@ -341,29 +330,22 @@ async def txt_handler(bot: Client, m: Message):
             name = f'{name1[:60]} {CREDIT}'
 
             if "youtube.com" in url or "youtu.be" in url:
-                prog = await m.reply_text(f"<i><b>Audio Downloading</b></i>\n<blockquote><b>{str(count).zfill(3)}) {name1}</b></blockquote>")
                 cmd = f'yt-dlp -x --audio-format mp3 --cookies {cookies_file_path} "{url}" -o "{name}.mp3"'
                 print(f"Running command: {cmd}")
                 os.system(cmd)
                 if os.path.exists(f'{name}.mp3'):
-                    await prog.delete(True)
-                    print(f"File {name}.mp3 exists, attempting to send...")
-                    try:
-                        await bot.send_document(chat_id=m.chat.id, document=f'{name}.mp3', caption=f'**🎵 Title : **  {name}.mp3\n\n🔗**Video link** : {url}\n\n🌟** Extracted By** : {CREDIT}')
-                        os.remove(f'{name}.mp3')
-                        count+=1
-                    except Exception as e:
-                        await m.reply_text(f'⚠️**Downloading Failed**⚠️\n**Name** =>> `{str(count).zfill(3)} {name1}`\n**Url** =>> {url}', disable_web_page_preview=True)
-                        count+=1
+                   print(f"File {name}.mp3 exists, attempting to send...")
+                   try:
+                       await bot.send_document(chat_id=m.chat.id, document=f'{name}.mp3', caption=f'**🎵 Title : **  {name}.mp3\n\n🔗**Video link** : {url}\n\n🌟** Extracted By** : {CREDIT}')
+                       os.remove(f'{name}.mp3')
+                   except Exception as e:
+                       print(f"Error sending document: {str(e)}")
                 else:
-                    await prog.delete(True)
-                    await m.reply_text(f'⚠️**Downloading Failed**⚠️\n**Name** =>> `{str(count).zfill(3)} {name1}`\n**Url** =>> {url}', disable_web_page_preview=True)
-                    count+=1
-                               
+                     print(f"File {name}.mp3 does not exist.")                
     except Exception as e:
         await m.reply_text(f"<b>Failed Reason:</b>\n<blockquote><b>{str(e)}</b></blockquote>")
     finally:
-        await m.reply_text("<blockquote><b>All YouTube Music Download Successfully</b></blockquote>")
+        await m.reply_text("🕊️Done Baby💞")
 
 
 m_file_path= "main.py"
@@ -389,7 +371,7 @@ async def getcookies_handler(client: Client, m: Message):
     except Exception as e:
         await m.reply_text(f"⚠️ An error occurred: {str(e)}")
 
-@bot.on_message(filters.command(["resat"]) )
+@bot.on_message(filters.command(["stop"]) )
 async def restart_handler(_, m):
     if m.chat.id not in AUTH_USERS:
         print(f"User ID not in AUTH_USERS", m.chat.id)
@@ -401,19 +383,9 @@ async def restart_handler(_, m):
             f"__**Your User id** __- `{m.chat.id}`</blockquote>\n\n"
         )
     else:
-        await m.reply_text("🚦**RESAT & RESTARTED**🚦", True)
+        await m.reply_text("🚦**STOPPED**🚦", True)
         os.execl(sys.executable, sys.executable, *sys.argv)
-
-@bot.on_message(filters.command("stop") & filters.private)
-async def cancel_handler(client: Client, m: Message):
-    global processing_request, cancel_requested
-    if processing_request:
-        cancel_requested = True
-        await m.delete()
-        cancel_message = await m.reply_text("**🚦 Process cancel request received. Stopping after current process...**")
-    else:
-        cancel_message = None
-        await m.reply_text("**⚡ No active process to cancel.**")
+        
 
 @bot.on_message(filters.command("start"))
 async def start(bot, m: Message):
@@ -458,7 +430,7 @@ async def start(bot, m: Message):
             f"🌟 Welcome {m.from_user.first_name}! 🌟\n\n" +
             f"Great! You are a premium member!\n"
             f"Use Command : /help to get started 🌟\n\n"
-            f"If you face any problem contact -  [{CREDIT}](https://t.me/saini_contact_bot)\n", disable_web_page_preview=True, reply_markup=BUTTONSCONTACT
+            f"If you face any problem contact -  [〱⏤͟͞𝙃 𝙈🐦‍🔥 〄](https://t.me/BABA_TILLU_JI_Bot)\n", disable_web_page_preview=True, reply_markup=BUTTONSCONTACT
         )
     else:
         await asyncio.sleep(2)
@@ -481,7 +453,7 @@ async def start(bot, m: Message):
            f"• 🎓 All Non DRM+AES Encrypted URLs\n"
            f"• 🎓 MPD URLs if the key is known (e.g., Mpd_url?key=key XX:XX)</blockquote>\n\n"
            f"🚀 You are not subscribed to any plan yet!\n\n"
-           f"<blockquote>💵 Monthly Plan: free</blockquote>\n\n"
+           f"<blockquote>💵 Monthly Plan: 800</blockquote>\n\n"
            f"If you want to buy membership of the bot, feel free to contact the Bot Admin.\n", disable_web_page_preview=True, reply_markup=keyboard
     )
 
@@ -506,7 +478,7 @@ async def id_command(client, message: Message):
            f"• 🎓 Utkarsh Protection(Video + PDF)\n"
            f"• 🎓 All Non DRM+AES Encrypted URLs\n"
            f"• 🎓 MPD URLs if the key is known (e.g., Mpd_url?key=key XX:XX)</blockquote>\n\n"
-           f"<b>💵 Monthly Plan: free</b>\n\n"
+           f"<b>💵 Monthly Plan: 800</b>\n\n"
            f"If you want to buy membership of the bot, feel free to contact the Bot Admin.\n", disable_web_page_preview=True, reply_markup=BUTTONSCONTACT
     )  
 
@@ -548,7 +520,6 @@ async def txt_handler(client: Client, m: Message):
         f"➥ /yt2m – YT link → .mp3 downloader\n"  
         f"➥ /t2t – Text → .txt Generator\n" 
         f"➥ /stop – Cancel Running Task\n"
-        f"➥ /resat – Resat Bot\n"
         f"▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰ \n" 
         f"⚙️ 𝗧𝗼𝗼𝗹𝘀 & 𝗦𝗲𝘁𝘁𝗶𝗻𝗴𝘀: \n\n" 
         f"➥ /cookies – Update YT Cookies\n" 
@@ -582,9 +553,6 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
 
 @bot.on_message(filters.command(["drm"]) )
 async def txt_handler(bot: Client, m: Message):  
-    global processing_request, cancel_requested, cancel_message
-    processing_request = True
-    cancel_requested = False
     if m.chat.id not in AUTH_USERS:
             print(f"User ID not in AUTH_USERS", m.chat.id)
             await bot.send_message(m.chat.id, f"<blockquote>__**Oopss! You are not a Premium member\nPLEASE /upgrade YOUR PLAN\nSend me your user id for authorization\nYour User id**__ - `{m.chat.id}`</blockquote>\n")
@@ -695,7 +663,7 @@ async def txt_handler(bot: Client, m: Message):
     except Exception:
             res = "UN"
 
-    await editable.edit(f"**Enter the Credit Name or send /d\n\n<blockquote><b>Format:</b>\n🔹Send __Admin__ only for caption\n🔹Send __Admin,filename__ for caption and file...Separate them with a comma (,)</blockquote>**")
+    await editable.edit(f"**Enter the Credit Name or send /d\n\n<blockquote>Format:\nSend __Admin__ only for caption\nSend __Admin,filename__ for caption and file\nSeparate them with a comma (,)</blockquote>**")
     try:
         input3: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text3 = input3.text
@@ -710,7 +678,7 @@ async def txt_handler(bot: Client, m: Message):
     else:
         CR = raw_text3
 
-    await editable.edit("**Enter 𝐏𝐖/𝐂𝐖/𝐂𝐏 Working Token For 𝐌𝐏𝐃 𝐔𝐑𝐋 or send /d**")
+    await editable.edit("**Enter __PW/CP/CW__ Working Token For 𝐌𝐏𝐃 𝐔𝐑𝐋 or send /d**")
     try:
         input4: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text4 = input4.text
@@ -777,12 +745,6 @@ async def txt_handler(bot: Client, m: Message):
     arg = int(raw_text)
     try:
         for i in range(arg-1, len(links)):
-            if cancel_requested:
-                await m.reply_text("🚦**STOPPED**🚦")
-                processing_request = False
-                cancel_requested = False
-                return
-  
             Vxy = links[i][1].replace("file/d/","uc?export=download&id=").replace("www.youtube-nocookie.com/embed", "youtu.be").replace("?modestbranding=1", "").replace("/view?usp=sharing","")
             url = "https://" + Vxy
             link0 = "https://" + Vxy
@@ -864,12 +826,12 @@ async def txt_handler(bot: Client, m: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             try:
-                cc = f'[🎥]Vid Id : {str(count).zfill(3)}\n**Video Title :** `{name1} [{res}p].mkv`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
-                cc1 = f'[📕]Pdf Id : {str(count).zfill(3)}\n**File Title :** `{name1}.pdf`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
-                cczip = f'[📁]Zip Id : {str(count).zfill(3)}\n**Zip Title :** `{name1}.zip`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n' 
-                ccimg = f'[🖼️]Img Id : {str(count).zfill(3)}\n**Img Title :** `{name1}.jpg`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
-                ccm = f'[🎵]Audio Id : {str(count).zfill(3)}\n**Audio Title :** `{name1}.mp3`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
-                cchtml = f'[🌐]Html Id : {str(count).zfill(3)}\n**Html Title :** `{name1}.html`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
+                cc = f'[🎥]Vid Id : {str(count).zfill(3)}\n**Video Title :** `{name1} [{res}p] .mkv`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
+                cc1 = f'[📕]Pdf Id : {str(count).zfill(3)}\n**File Title :** `{name1} .pdf`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
+                cczip = f'[📁]Zip Id : {str(count).zfill(3)}\n**Zip Title :** `{name1} .zip`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n' 
+                ccimg = f'[🖼️]Img Id : {str(count).zfill(3)}\n**Img Title :** `{name1} .jpg`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
+                ccm = f'[🎵]Audio Id : {str(count).zfill(3)}\n**Audio Title :** `{name1} .mp3`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
+                cchtml = f'[🌐]Html Id : {str(count).zfill(3)}\n**Html Title :** `{name1} .html`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
                   
                 if "drive" in url:
                     try:
@@ -1031,6 +993,7 @@ async def text_handler(bot: Client, m: Message):
     if match:
         link = match.group(0)
     else:
+        await m.reply_text("<pre><code>Invalid link format.</code></pre>")
         return
         
     editable = await m.reply_text(f"<pre><code>**🔹Processing your link...\n🔁Please wait...⏳**</code></pre>")
@@ -1059,7 +1022,7 @@ async def text_handler(bot: Client, m: Message):
     except Exception:
             res = "UN"
           
-    await editable.delete()
+   
     raw_text4 = "working_token"
     thumb = "/d"
     count =0
@@ -1275,47 +1238,7 @@ async def text_handler(bot: Client, m: Message):
     except Exception as e:
         await m.reply_text(str(e))
 
-#...............…........
-def notify_owner():
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = {
-        "chat_id": OWNER,
-        "text": "𝐁𝐨𝐭 𝐑𝐞𝐬𝐚𝐭 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥𝐥𝐲 ✅"
-    }
-    requests.post(url, data=data)
 
-
-def reset_and_set_commands():
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/setMyCommands"
-    # Reset
-    requests.post(url, json={"commands": []})
-    # Set new
-    commands = [
-        {"command": "start", "description": "✅ Check Alive the Bot"},
-        {"command": "stop", "description": "🚫 Stop the ongoing process"},
-        {"command": "help", "description": "👨‍🏭 Help about the Bot"},
-        {"command": "drm", "description": "📑 Upload .txt file"},
-        {"command": "cookies", "description": "📁 Upload YT Cookies"},
-        {"command": "y2t", "description": "🔪 YouTube → .txt Converter"},
-        {"command": "ytm", "description": "🎶 YT .txt → .mp3 downloader"},
-        {"command": "yt2m", "description": "🎵 YT link → .mp3 downloader"},
-        {"command": "t2t", "description": "📟 Text → .txt Generator"},
-        {"command": "resat", "description": "✅ Resat the Bot"},
-        {"command": "id", "description": "🆔 Get Your ID"},
-        {"command": "info", "description": "ℹ️ Check Your Information"},
-        {"command": "logs", "description": "👁️ View Bot Activity"},
-        {"command": "addauth", "description": "▶️ Add Authorisation"},
-        {"command": "rmauth", "description": "⏸️ Remove Authorisation "},
-        {"command": "users", "description": "👨‍👨‍👧‍👦 All Premium Users"}
-    ]
-    requests.post(url, json={"commands": commands})
-    
-
-
-
-if __name__ == "__main__":
-    reset_and_set_commands()
-    notify_owner() 
 
 
 bot.run()
